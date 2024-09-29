@@ -1,17 +1,7 @@
 // סכמה ליצירת משתמש חדש
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import {IUser} from '../utils/types'
 
-// של משתמש typeהגדרת ה
-export interface IUser extends Document {
-    firstName: string,
-    lastName: string,
-    email: string,
-    phone: string,
-    password: string,
-    workSpaceList:string[],
-    icon: string,
-  }
-  
  //  הגדרת הסכמה לשדות המשתמש
   const userSchema: Schema = new Schema({
     firstName: { type: String, required: true, minlength: 2 },                               // שם פרטי, נדרש
