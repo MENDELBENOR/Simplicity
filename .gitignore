@@ -18,3 +18,9 @@
 # Ignore OS-specific files
 .DS_Store
 Thumbs.db
+
+request.http
+package-lock.json
+.env
+
+
