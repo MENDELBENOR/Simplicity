@@ -10,7 +10,7 @@ import {IUser} from '../utils/types'
     phone: { type: String, required: true, unique: true },                                // מספר טלפון, ייחודי ונדרש  
     password: { type: String, required: true, minlength: 8,match: /^\$2b\$10\$.+/},    // סיסמהת ייחודי ונדרש מוגבל לספרות ואותיות לועזיות
     workSpaceList: { type: [String] },                                                  // חיבור ל workspaces
-    icon: { type: String }                                                             // הוספת אייקון
+    icon: { type: String, default: "" }                                                             // הוספת אייקון
   }, {
     timestamps: true                                                                  // מוסיף שדות לתארוך זמן יצירת היוזר, ולזמן עדכון היוזר
   });

@@ -11,7 +11,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   }
 };
 const createUser = async (req: Request, res: Response)=> {
-  const { firstName, lastName, email, phone, password } = req.body;
+  const { firstName, lastName, email, phone, password, icon } = req.body;
   // Check if all fields are provided 
   if (!firstName || !lastName || !email || !phone || !password) {
     res.status(400).json({ message: 'Please provide all the required fields.' });
@@ -28,7 +28,7 @@ const createUser = async (req: Request, res: Response)=> {
     // Hash the password
     let newPassword: string = await bcrypt.hash(password, 10);
     console.log(newPassword);
-    let newUser = new User({ firstName, lastName, email, phone, password: newPassword });
+    let newUser = new User({ firstName, lastName, email, phone, password: newPassword, icon });
     await newUser.save();
     newUser.password = '*****';
     res.status(200).json(newUser);
