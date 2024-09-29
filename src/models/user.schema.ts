@@ -16,6 +16,6 @@ import {IUser} from '../utils/types'
   });
   
   // יצירת המודל עבור הקולקציה "users"
-  const User = mongoose.model<IUser>('User', userSchema);
+  const User = mongoose.model<IUser>('user', userSchema);
   
   export default User;

@@ -1,6 +1,8 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import userRouter from './routes/user.route'
+
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,6 +19,10 @@ app.use(express.json()); // To parse incoming JSON requests
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello, World!');
 });
+
+// Users routes
+app.use('/api/users', userRouter);
+
 
 // Start the server
 app.listen(PORT, () => {

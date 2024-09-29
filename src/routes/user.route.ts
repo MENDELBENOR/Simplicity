@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { getAllUsers } from '../controllers/user.controllers';
 
-const router = Router();
+const userRouter = Router();
 
 // Route to get all users
-router.get('/api/getAllUsers', getAllUsers);
+userRouter.get('/getAllUsers', getAllUsers);
 
-export default router;
+export default userRouter;
