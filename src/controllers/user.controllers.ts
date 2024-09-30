@@ -11,6 +11,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   }
 };
 const createUser = async (req: Request, res: Response)=> {
+  
   const { firstName, lastName, email, phone, password, icon } = req.body;
   // Check if all fields are provided 
   if (!firstName || !lastName || !email || !phone || !password) {
