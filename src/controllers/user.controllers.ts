@@ -79,7 +79,6 @@ const createUser = async (req: Request, res: Response) => {
 
     res.status(200).json(response);
   } catch (err) {
-
     const response:ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Failed to create user',
@@ -150,10 +149,24 @@ const searchUsers = async (req: Request, res: Response) => {
       const users = await User.find({ firstName:  regex});
 
       if (users.length > 0) {
-        res.status(200).json(users);
+        const response:ServerResponse<object[]> = {
+          isSuccessful: true,
+          displayMessage: 'Fetched the users successfully',
+          description: null,
+          exception: null,
+          data: [users]
+         };
+        res.status(200).json(response);
         return;
       }
-      res.status(404).json({ message: 'The user/s does not exist'});
+      const response:ServerResponse<object[]> = {
+        isSuccessful: false,
+        displayMessage: 'The user/s does not exist.',
+        description: null,
+        exception: null,
+        data: null,  
+       };
+      res.status(404).json(response);
       return;
     } 
     // בודק אם השם משפחה לא NULL
@@ -162,10 +175,24 @@ const searchUsers = async (req: Request, res: Response) => {
       const users = await User.find({ lastName: regex });
 
       if(users.length > 0){
-        res.status(200).json(users);
+        const response:ServerResponse<object[]> = {
+          isSuccessful: true,
+          displayMessage: 'Fetched the users successfully',
+          description: null,
+          exception: null,
+          data: [users]
+         };
+        res.status(200).json(response);
         return;
       }
-      res.status(404).json({ message: 'The user/s does not exist'});
+      const response:ServerResponse<object[]> = {
+        isSuccessful: false,
+        displayMessage: 'The user/s does not exist.',
+        description: null,
+        exception: null,
+        data: null,  
+       };
+      res.status(404).json(response);
       return;
     }
     // בודק אם המייל לא NULL
@@ -174,10 +201,24 @@ const searchUsers = async (req: Request, res: Response) => {
       const users = await User.find({ email: regex });
 
       if(users.length > 0){
-      res.status(200).json(users);
+        const response:ServerResponse<object[]> = {
+          isSuccessful: true,
+          displayMessage: 'Fetched the users successfully',
+          description: null,
+          exception: null,
+          data: [users]
+         };
+      res.status(200).json(response);
       return;
       }
-      res.status(404).json({ message: 'The user/s does not exist'});
+      const response:ServerResponse<object[]> = {
+        isSuccessful: false,
+        displayMessage: 'The user/s does not exist.',
+        description: null,
+        exception: null,
+        data: null,  
+       };
+      res.status(404).json(response);
       return;
     }
     // בודק אם הפלאפון לא NULL
@@ -186,18 +227,46 @@ const searchUsers = async (req: Request, res: Response) => {
       const users = await User.find({ phone: regex });
 
       if(users.length > 0){
-      res.status(200).json(users);
+        const response:ServerResponse<object[]> = {
+          isSuccessful: true,
+          displayMessage: 'Fetched the users successfully',
+          description: null,
+          exception: null,
+          data: [users]
+         };
+      res.status(200).json(response);
       return;
       }
-      res.status(404).json({ message: 'The user/s does not exist'});
+      const response:ServerResponse<object[]> = {
+        isSuccessful: false,
+        displayMessage: 'The user/s does not exist.',
+        description: null,
+        exception: null,
+        data: null,  
+       };
+      res.status(404).json(response);
       return;
     }
     // אם כל השדות היו NULL
-      res.status(400).json({ message: 'Please provide at least one search criteria.' });
+    const response:ServerResponse<object[]> = {
+      isSuccessful: false,
+      displayMessage: 'Please provide at least one search criteria.',
+      description: null,
+      exception: null,
+      data: null,  
+     };
+      res.status(400).json(response);
       
     // למקרה ויש ERROR
   } catch (err) {
-    res.status(500).json({ message: 'Searching user/s', error: err });
+    const response:ServerResponse<object[]> = {
+      isSuccessful: false,
+      displayMessage: 'Failed to search users',
+      description: null,
+      exception: err instanceof Error ? err.message : 'Unknown error',
+      data: null,  
+     };
+    res.status(500).json(response);
   }
 };
 
