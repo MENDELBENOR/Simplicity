@@ -18,4 +18,3 @@ export interface ServerResponse<T> {
     exception: string | null;            // תיאור החריגה (אם קרתה שגיאה)
     data: T;                             // כל המידע הקשור לבקשה
 }
-  
