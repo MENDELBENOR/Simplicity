@@ -10,4 +10,12 @@ export interface IUser extends Document{
     workSpaceList:string[],
     icon: string,
 }
+
+export interface ServerResponse<T> {
+    isSuccessful: boolean;               // האם הבקשה הצליחה
+    displayMessage: string | null;       // הודעה למשתמש
+    description: string | null;          // תיאור נוסף (אם קיים)
+    exception: string | null;            // תיאור החריגה (אם קרתה שגיאה)
+    data: T;                             // כל המידע הקשור לבקשה
+}
   
