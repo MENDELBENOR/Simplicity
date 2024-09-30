@@ -1,33 +1,25 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import User from '../models/user.schema'; 
-import {ServerResponse} from '../utils/types'
+import User from '../models/user.schema';
+import { buildResponse } from '../utils/helper'
+
+
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const users = await User.find();  
-
-    const response:ServerResponse<object[]> = {
-       isSuccessful: true,
-       displayMessage: 'Fetched all users successfully',
-       description: null,
-       exception: null,
-       data: users 
-      };
-
+    const users = await User.find();
+    
+    const response = buildResponse( true, 'Fetched all users successfully', null, null, users );
     res.status(200).json(response);
 
   } catch (error) {
 
-    const response:ServerResponse<object[]> = {
-      isSuccessful: false,
-      displayMessage: 'Failed to load users',
-      description: null,
-      exception: error instanceof Error ? error.message : 'Unknown error',
-      data: null,  
-     };
+    const response = buildResponse ( 
+      false, 'Failed to load users', null, error instanceof Error ? error.message : 'Unknown error', null,
+    );
+
     res.status(500).json(response);
   }
 };
@@ -35,18 +27,27 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
 
 
 // יצירת משתמש חדש
-const createUser = async (req: Request, res: Response)=> {
+const createUser = async (req: Request, res: Response) => {
+
   const { firstName, lastName, email, phone, password, icon } = req.body;
+  
   // Check if all fields are provided 
   if (!firstName || !lastName || !email || !phone || !password) {
-    res.status(400).json({ message: 'Please provide all the required fields.' });
+
+    const response =  buildResponse (
+      false, 'Please provide all the required fields', null, 'One of the fields (or more) is missing', null  
+      );
+
+    res.status(400).json(response);
     return;
   }
+
   try {
     // Check if the user already exists
     const user = await User.findOne({ email });
     if (user) {
-      res.status(400).json({ message: 'User already exists.' });
+      const response = buildResponse ( false, 'User already exists', null, null, null );
+      res.status(400).json(response);
       return;
     }
     // Create new user
@@ -56,31 +57,52 @@ const createUser = async (req: Request, res: Response)=> {
     let newUser = new User({ firstName, lastName, email, phone, password: newPassword, icon });
     await newUser.save();
     newUser.password = '*****';
-    res.status(200).json(newUser);
+    const response = buildResponse ( true, 'New user successfully created', null, null, newUser )
+    res.status(200).json(response);
+
   } catch (err) {
-    res.status(500).json({ message: 'Error creating user', error: err });
+    const response = buildResponse ( 
+      false, 'Error creating user', null, err instanceof Error ? err.message : 'Unknown error', null 
+    );
+    res.status(500).json(response);
   }
 };
 
+
+
+
+// עדכון משתמש קיים
 const updateUser = async (req: Request, res: Response) => {
   const { firstName, lastName, phone, _id } = req.body;
-  
+
   // בדיקת שדות שהתקבלו
   if (!firstName || !lastName || !phone) {
-    res.status(400).json({ message: 'Please provide all the required fields.' });
+
+    const response = buildResponse (
+      false, 'No information for update',  null, 'No matching parameter was received', null
+    );
+    
+    res.status(400).json(response);
     return;
   }
 
   // בדיקת אורך השם הפרטי והמשפחה
   if (firstName.length < 2 || lastName.length < 2) {
-    res.status(400).json({ message: 'First name and last name must be at least 2 characters long.' });
+    const response = buildResponse (
+      false, 'First and last name must be at least 2 characters long',  null, 'First or last name is shorter than the required length', null
+    );
+    res.status(400).json(response);
     return;
   }
 
   // בדיקת אורך הטלפון (נניח שבישראל זה 10 ספרות)
-const phoneRegex = /^[0-9+\-]{9,14}$/;
+  const phoneRegex = /^[0-9+\-]{9,14}$/;
   if (!phoneRegex.test(phone)) {
-    res.status(400).json({ message: 'Phone number must be between 9 and 14 digits and can include + or - at the beginning.' });
+    const response = buildResponse (
+      false, 'Phone number must be between 9 and 14 digits and can include + or - at the beginning',
+      null, 'Invalid phone number', null
+    );
+    res.status(400).json(response);
     return;
   }
 
@@ -88,7 +110,10 @@ const phoneRegex = /^[0-9+\-]{9,14}$/;
     // חיפוש המשתמש לפי ה-ID
     const user = await User.findById(_id);
     if (!user) {
-      res.status(404).json({ message: 'User not found.' });
+
+      const response = buildResponse ( false, 'User not found', null, null, null );
+
+      res.status(404).json(response);
       return;
     }
 
@@ -104,13 +129,23 @@ const phoneRegex = /^[0-9+\-]{9,14}$/;
     user.password = '*****';
 
     // החזרת המשתמש המעודכן בתגובה
-    res.status(200).json(user);
+    const response = buildResponse ( true, 'User successfully updated', null, null, user );
+
+    res.status(200).json(response);
+
   } catch (err) {
-    res.status(500).json({ message: 'Error updating user', error: err });
+    const response = buildResponse ( 
+      false, 'Error updating user', null, err instanceof Error ? err.message : 'Unknown error', null 
+    );
+
+    res.status(500).json(response);
   }
 };
 
 export { getAllUsers, createUser, updateUser };
+
+
+
 
 
 
