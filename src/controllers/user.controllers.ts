@@ -1,15 +1,40 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import User from '../models/user.schema'; // Ensure this import matches your project structure
+import User from '../models/user.schema'; 
+import {ServerResponse} from '../utils/types'
 
+// שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const users = await User.find();   
-    res.status(200).json(users);
+
+    const users = await User.find();  
+
+    const response:ServerResponse<object[]> = {
+       isSuccessful: true,
+       displayMessage: 'Fetched all users successfully',
+       description: null,
+       exception: null,
+       data: users 
+      };
+
+    res.status(200).json(response);
+
   } catch (error) {
-    res.status(500).json({ message: error });
+
+    const response:ServerResponse<object[]> = {
+      isSuccessful: false,
+      displayMessage: 'Failed to load users',
+      description: null,
+      exception: error instanceof Error ? error.message : 'Unknown error',
+      data: null,  
+     };
+    res.status(500).json(response);
   }
 };
+
+
+
+// יצירת משתמש חדש
 const createUser = async (req: Request, res: Response)=> {
   const { firstName, lastName, email, phone, password, icon } = req.body;
   // Check if all fields are provided 
