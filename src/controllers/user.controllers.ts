@@ -56,9 +56,27 @@ const createUser = async (req: Request, res: Response)=> {
     let newUser = new User({ firstName, lastName, email, phone, password: newPassword, icon });
     await newUser.save();
     newUser.password = '*****';
-    res.status(200).json(newUser);
+
+    const response:ServerResponse<object[]> = {
+      isSuccessful: true,
+      displayMessage: 'Fetched the new user successfully',
+      description: null,
+      exception: null,
+      data: [newUser]
+     };
+
+    res.status(200).json(response);
   } catch (err) {
-    res.status(500).json({ message: 'Error creating user', error: err });
+
+    const response:ServerResponse<object[]> = {
+      isSuccessful: false,
+      displayMessage: 'Failed to create user',
+      description: null,
+      exception: err instanceof Error ? err.message : 'Unknown error',
+      data: null,  
+     };
+
+    res.status(500).json(response);
   }
 };
 
@@ -109,6 +127,8 @@ const phoneRegex = /^[0-9+\-]{9,14}$/;
     res.status(500).json({ message: 'Error updating user', error: err });
   }
 };
+
+
 
 export { getAllUsers, createUser, updateUser };
 
