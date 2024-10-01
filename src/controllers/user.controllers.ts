@@ -4,8 +4,6 @@ import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import {ServerResponse} from '../utils/types';
 
-
-
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
 
@@ -20,8 +18,6 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
     const response = buildResponse( true, 'Fetched all users successfully', null, null, users );
     res.status(200).json(response);
 
-    const users = await User.find();
-    res.status(200).json(users);
   } catch (error) {
 
     const response = buildResponse ( 
@@ -33,7 +29,6 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
 };
 
 // פונקציה ליצירת משתמש חדש
-const createUser = async (req: Request, res: Response) => {
 const createUser = async (req: Request, res: Response) => {
   const { firstName, lastName, email, phone, password, icon } = req.body;
   // בודק שכל השדות מלאים 
@@ -66,26 +61,6 @@ const createUser = async (req: Request, res: Response) => {
     res.status(200).json(response);
 
   } catch (err) {
-    res.status(500).json({ message: 'Error creating user', error: err });
-  }
-};
-//delete by email
-const deleteUserByEmail = async (req: Request, res: Response) => {
-  const {email} = req.body;
-  try {
-    const deletedUser = await User.findOneAndDelete({ email });
-    if (!deletedUser) {
-      res.status(404).json({ message: 'User not found' })
-      return;
-    }
-    res.status(200).json({ message: 'User deleted successfully' })
-    return;
-  } catch (error) {
-    res.status(404).json({ message: error })
-  }
-}
-
-export { getAllUsers, createUser, deleteUserByEmail };
     const response = buildResponse ( 
       false, 'Error creating user', null, err instanceof Error ? err.message : 'Unknown error', null 
     );
@@ -298,9 +273,20 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
-export { getAllUsers, createUser, searchUsers, updateUser};
+//delete by email
+const deleteUserByEmail = async (req: Request, res: Response) => {
+  const {email} = req.body;
+  try {
+    const deletedUser = await User.findOneAndDelete({ email });
+    if (!deletedUser) {
+      res.status(404).json({ message: 'User not found' })
+      return;
+    }
+    res.status(200).json({ message: 'User deleted successfully' })
+    return;
+  } catch (error) {
+    res.status(404).json({ message: error })
+  }
+}
 
-
-
-
-
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail};
