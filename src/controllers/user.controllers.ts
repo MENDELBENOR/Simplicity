@@ -1,33 +1,33 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import User from '../models/user.schema'; 
-import {ServerResponse} from '../utils/types'
+import User from '../models/user.schema';
+import { ServerResponse } from '../utils/types'
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const users = await User.find();  
+    const users = await User.find();
 
-    const response:ServerResponse<object[]> = {
-       isSuccessful: true,
-       displayMessage: 'Fetched all users successfully',
-       description: null,
-       exception: null,
-       data: users 
-      };
+    const response: ServerResponse<object[]> = {
+      isSuccessful: true,
+      displayMessage: 'Fetched all users successfully',
+      description: null,
+      exception: null,
+      data: users
+    };
 
     res.status(200).json(response);
 
   } catch (error) {
 
-    const response:ServerResponse<object[]> = {
+    const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Failed to load users',
       description: null,
       exception: error instanceof Error ? error.message : 'Unknown error',
-      data: null,  
-     };
+      data: null,
+    };
     res.status(500).json(response);
   }
 };
@@ -37,13 +37,13 @@ const createUser = async (req: Request, res: Response) => {
   const { firstName, lastName, email, phone, password, icon } = req.body;
   // בודק שכל השדות מלאים 
   if (!firstName || !lastName || !email || !phone || !password) {
-    const response:ServerResponse<object[]> = {
+    const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Please provide all the required fields.',
       description: null,
       exception: null,
-      data: null,  
-     };
+      data: null,
+    };
     res.status(400).json(response);
     return;
   }
@@ -51,41 +51,41 @@ const createUser = async (req: Request, res: Response) => {
     // בודק אם המשתמש כבר קיים
     const user = await User.findOne({ email });
     if (user) {
-      const response:ServerResponse<object[]> = {
+      const response: ServerResponse<object[]> = {
         isSuccessful: false,
         displayMessage: 'User already exists.',
         description: null,
         exception: null,
-        data: null,  
-       };
+        data: null,
+      };
       res.status(400).json(response);
       return;
     }
     // יצירת משתמש חדש
     // הצפנה של הקוד
     let newPassword: string = await bcrypt.hash(password, 10);
-    
+
     let newUser = new User({ firstName, lastName, email, phone, password: newPassword, icon });
     await newUser.save();
     newUser.password = '*****';
 
-    const response:ServerResponse<object[]> = {
+    const response: ServerResponse<object[]> = {
       isSuccessful: true,
       displayMessage: 'Fetched the new user successfully',
       description: null,
       exception: null,
       data: [newUser]
-     };
+    };
 
     res.status(200).json(response);
   } catch (err) {
-    const response:ServerResponse<object[]> = {
+    const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Failed to create user',
       description: null,
       exception: err instanceof Error ? err.message : 'Unknown error',
-      data: null,  
-     };
+      data: null,
+    };
 
     res.status(500).json(response);
   }
@@ -93,7 +93,7 @@ const createUser = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
   const { firstName, lastName, phone, _id } = req.body;
-  
+
   // בדיקת שדות שהתקבלו
   if (!firstName || !lastName || !phone) {
     res.status(400).json({ message: 'Please provide all the required fields.' });
@@ -107,7 +107,7 @@ const updateUser = async (req: Request, res: Response) => {
   }
 
   // בדיקת אורך הטלפון (נניח שבישראל זה 10 ספרות)
-const phoneRegex = /^[0-9+\-]{9,14}$/;
+  const phoneRegex = /^[0-9+\-]{9,14}$/;
   if (!phoneRegex.test(phone)) {
     res.status(400).json({ message: 'Phone number must be between 9 and 14 digits and can include + or - at the beginning.' });
     return;
@@ -146,52 +146,52 @@ const searchUsers = async (req: Request, res: Response) => {
     // בודק אם השם פרטי לא NULL
     if (firstName) {
       const regex = new RegExp(firstName, 'i');
-      const users = await User.find({ firstName:  regex});
+      const users = await User.find({ firstName: regex });
 
       if (users.length > 0) {
-        const response:ServerResponse<object[]> = {
+        const response: ServerResponse<object[]> = {
           isSuccessful: true,
           displayMessage: 'Fetched the users successfully',
           description: null,
           exception: null,
           data: [users]
-         };
+        };
         res.status(200).json(response);
         return;
       }
-      const response:ServerResponse<object[]> = {
+      const response: ServerResponse<object[]> = {
         isSuccessful: false,
         displayMessage: 'The user/s does not exist.',
         description: null,
         exception: null,
-        data: null,  
-       };
+        data: null,
+      };
       res.status(404).json(response);
       return;
-    } 
+    }
     // בודק אם השם משפחה לא NULL
     if (lastName) {
       const regex = new RegExp(lastName, 'i');
       const users = await User.find({ lastName: regex });
 
-      if(users.length > 0){
-        const response:ServerResponse<object[]> = {
+      if (users.length > 0) {
+        const response: ServerResponse<object[]> = {
           isSuccessful: true,
           displayMessage: 'Fetched the users successfully',
           description: null,
           exception: null,
           data: [users]
-         };
+        };
         res.status(200).json(response);
         return;
       }
-      const response:ServerResponse<object[]> = {
+      const response: ServerResponse<object[]> = {
         isSuccessful: false,
         displayMessage: 'The user/s does not exist.',
         description: null,
         exception: null,
-        data: null,  
-       };
+        data: null,
+      };
       res.status(404).json(response);
       return;
     }
@@ -200,24 +200,24 @@ const searchUsers = async (req: Request, res: Response) => {
       const regex = new RegExp(email, 'i');
       const users = await User.find({ email: regex });
 
-      if(users.length > 0){
-        const response:ServerResponse<object[]> = {
+      if (users.length > 0) {
+        const response: ServerResponse<object[]> = {
           isSuccessful: true,
           displayMessage: 'Fetched the users successfully',
           description: null,
           exception: null,
           data: [users]
-         };
-      res.status(200).json(response);
-      return;
+        };
+        res.status(200).json(response);
+        return;
       }
-      const response:ServerResponse<object[]> = {
+      const response: ServerResponse<object[]> = {
         isSuccessful: false,
         displayMessage: 'The user/s does not exist.',
         description: null,
         exception: null,
-        data: null,  
-       };
+        data: null,
+      };
       res.status(404).json(response);
       return;
     }
@@ -226,51 +226,51 @@ const searchUsers = async (req: Request, res: Response) => {
       const regex = new RegExp(phone, 'i');
       const users = await User.find({ phone: regex });
 
-      if(users.length > 0){
-        const response:ServerResponse<object[]> = {
+      if (users.length > 0) {
+        const response: ServerResponse<object[]> = {
           isSuccessful: true,
           displayMessage: 'Fetched the users successfully',
           description: null,
           exception: null,
           data: [users]
-         };
-      res.status(200).json(response);
-      return;
+        };
+        res.status(200).json(response);
+        return;
       }
-      const response:ServerResponse<object[]> = {
+      const response: ServerResponse<object[]> = {
         isSuccessful: false,
         displayMessage: 'The user/s does not exist.',
         description: null,
         exception: null,
-        data: null,  
-       };
+        data: null,
+      };
       res.status(404).json(response);
       return;
     }
     // אם כל השדות היו NULL
-    const response:ServerResponse<object[]> = {
+    const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Please provide at least one search criteria.',
       description: null,
       exception: null,
-      data: null,  
-     };
-      res.status(400).json(response);
-      
+      data: null,
+    };
+    res.status(400).json(response);
+
     // למקרה ויש ERROR
   } catch (err) {
-    const response:ServerResponse<object[]> = {
+    const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Failed to search users',
       description: null,
       exception: err instanceof Error ? err.message : 'Unknown error',
-      data: null,  
-     };
+      data: null,
+    };
     res.status(500).json(response);
   }
 };
 
-export { getAllUsers, createUser, searchUsers, updateUser};
+export { getAllUsers, createUser, searchUsers, updateUser, };
 
 
 
