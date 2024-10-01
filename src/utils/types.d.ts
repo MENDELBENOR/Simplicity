@@ -11,6 +11,7 @@ export interface IUser extends Document{
     icon: string,
 }
 
+
 export interface ServerResponse<T> {
     isSuccessful: boolean;               // האם הבקשה הצליחה
     displayMessage: string | null;       // הודעה למשתמש
