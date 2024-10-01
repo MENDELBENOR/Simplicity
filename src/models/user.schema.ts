@@ -8,7 +8,7 @@ import {IUser} from '../utils/types'
     lastName: { type: String, required: true, minlength: 2 },                               // שם משפחה, נדרש
     email: { type: String, required: true, unique: true },                                 // אימייל, ייחודי ונדרש
     phone: { type: String, required: true, unique: true },                                // מספר טלפון, ייחודי ונדרש  
-    password: { type: String, required: true, minlength: 8,match: /^\$2b\$10\$.+/},    // סיסמהת ייחודי ונדרש מוגבל לספרות ואותיות לועזיות
+    password: { type: String, required: true, minlength: 8,match: /^\$2b\$10\$.+/},    // סיסמה ייחודי ונדרש מוגבל לספרות ואותיות לועזיות
     workSpaceList: { type: [String] },                                                  // חיבור ל workspaces
     icon: { type: String, default: "" }                                                             // הוספת אייקון
   }, {
