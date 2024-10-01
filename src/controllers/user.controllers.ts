@@ -7,9 +7,14 @@ import { buildResponse } from '../utils/helper'
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+
   try {
 
     const users = await User.find();
+
+    if(!users || users.length === 0 ){
+      throw new Error('No users found');
+    }
     
     const response = buildResponse( true, 'Fetched all users successfully', null, null, users );
     res.status(200).json(response);

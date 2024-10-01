@@ -15,4 +15,4 @@ export const buildResponse = <T>(
       exception,
       data,
     };
-  };
+};
