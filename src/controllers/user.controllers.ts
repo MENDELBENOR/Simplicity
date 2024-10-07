@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
+import { write, utils } from 'xlsx';
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -10,6 +11,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
 
     const users = await User.find();
+
 
     if (!users || users.length === 0) {
       throw new Error('No users found');
@@ -251,7 +253,7 @@ const searchUsers = async (req: Request, res: Response) => {
       return;
     }
     // אם כל השדות היו NULL
-    const response: ServerResponse<object[]> = {
+
     const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Please provide at least one search criteria.',
@@ -261,13 +263,8 @@ const searchUsers = async (req: Request, res: Response) => {
     };
     res.status(400).json(response);
 
-      data: null,
-    };
-    res.status(400).json(response);
-
     // למקרה ויש ERROR
   } catch (err) {
-    const response: ServerResponse<object[]> = {
     const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Failed to search users',
@@ -303,11 +300,45 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
       exception: null,
       data: null,
     };
-    res.status(200).json({response})
+    res.status(200).json({ response })
     return;
   } catch (error) {
     res.status(404).json({ message: error })
   }
 }
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail };
+const exportUsers = async (req: Request, res: Response) => {
+
+
+  try {
+
+    const users = await User.find();
+
+    if (!users || users.length === 0) {
+      throw new Error('No users found');
+    }
+
+    const ws = utils.json_to_sheet(users);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // יצירת Buffer מהקובץ
+    const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' }); // השתמש ב-write במקום writeFile
+
+
+
+    // שליחת הקובץ ללקוח
+    res.setHeader('Content-Disposition', 'attachment; filename=data.xlsx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const response = buildResponse(true, 'export users successfully', null, null, users);
+    res.status(200).json(response);
+
+  } catch (error) {
+    const response = buildResponse(
+      false, 'Failed to export users', null, error instanceof Error ? error.message : 'Unknown error', null,
+    );
+    res.status(500).json(response);
+  }
+};
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers };
