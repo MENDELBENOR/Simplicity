@@ -307,38 +307,44 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
   }
 }
 
+
+
 const exportUsers = async (req: Request, res: Response) => {
-
-
   try {
-
     const users = await User.find();
 
     if (!users || users.length === 0) {
-      throw new Error('No users found');
+      throw new Error('לא נמצאו משתמשים');
     }
 
-    const ws = utils.json_to_sheet(users);
+    // פורמט את נתוני המשתמשים כך שיכללו רק שדות נחוצים
+    const formattedUsers = users.map(({ _id, firstName, lastName, email, phone }) => ({
+      ID: _id,
+      FirstName: firstName,
+      LastName: lastName,
+      Email: email,
+      Phone: phone,
+    }));
+
+    const ws = utils.json_to_sheet(formattedUsers);
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, 'Sheet1');
+    utils.book_append_sheet(wb, ws, 'משתמשים');
 
     // יצירת Buffer מהקובץ
-    const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' }); // השתמש ב-write במקום writeFile
+    const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' });
+    const base64File = buffer.toString('base64'); // המרת ה-Buffer ל-base64
 
-
-
-    // שליחת הקובץ ללקוח
-    res.setHeader('Content-Disposition', 'attachment; filename=data.xlsx');
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    const response = buildResponse(true, 'export users successfully', null, null, users);
-    res.status(200).json(response);
+    // הגדרת התגובה
+    const response = buildResponse(true, 'ייצוא משתמשים הצליח', null, null, base64File);
+    res.status(200).json(response); // שליחת התגובה
 
   } catch (error) {
     const response = buildResponse(
-      false, 'Failed to export users', null, error instanceof Error ? error.message : 'Unknown error', null,
+      false, 'נכשל בייצוא המשתמשים', null, error instanceof Error ? error.message : 'שגיאה לא ידועה', null,
     );
     res.status(500).json(response);
   }
 };
+
 
 export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers };
