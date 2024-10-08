@@ -148,13 +148,6 @@ const updateUser = async (req: Request, res: Response) => {
 const searchUsers = async (req: Request, res: Response) => {
   try {
     const {text} = req.params;
-    // בודק שהמשתמש הכניס תוכן
-    if (!text) {
-      const users = await User.find();
-      const response = buildResponse(true, 'Search users successfully', null, null, users);
-      res.status(200).json(response);
-      return;
-    }
     const users = await User.find();
     const allUsers = users.filter(user => user.firstName.match(text) || user.lastName.match(text) || user.email.match(text));
     if (allUsers.length == 0) {
