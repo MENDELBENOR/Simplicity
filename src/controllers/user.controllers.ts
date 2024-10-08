@@ -4,6 +4,7 @@ import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
 import { write, utils } from 'xlsx';
+import {createToken} from '../utils/helper'
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -234,5 +235,29 @@ const exportUsers = async (req: Request, res: Response) => {
   }
 };
 
+const login = async (req: Request, res: Response)=>{
+  try{
+    const { email, password} = req.body;
+    const user = await User.findOne({ email });
+    if(!user){
+      const response = buildResponse(false, 'The user does NOT exist', null, null, null);
+      res.status(401).json(response);
+      return;
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if(!isMatch){
+      const response = buildResponse(false, 'Invalid credentials', null, null, null);
+      res.status(401).json(response);
+      return;
+    }
+    const token = createToken(user._id);
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers };
+
+  }catch(err){
+    const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
+    res.status(500).json(response);
+  }
+}
+
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login };
