@@ -148,7 +148,6 @@ const updateUser = async (req: Request, res: Response) => {
 const searchUsers = async (req: Request, res: Response) => {
   try {
     const {text} = req.params;
-    console.log(text);
     // בודק שהמשתמש הכניס תוכן
     if (!text) {
       const response = buildResponse(false, 'You need to insert content', null, null, null);
