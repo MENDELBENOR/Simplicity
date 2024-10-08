@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
+import { write, utils } from 'xlsx';
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -10,6 +11,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
 
     const users = await User.find();
+
 
     if (!users || users.length === 0) {
       throw new Error('No users found');
@@ -145,130 +147,19 @@ const updateUser = async (req: Request, res: Response) => {
 // פונקציה לחיפוש משתמש
 const searchUsers = async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, email, phone } = req.body;
-    // בודק אם השם פרטי לא NULL
-    if (firstName) {
-      const regex = new RegExp(firstName, 'i');
-      const users = await User.find({ firstName: regex });
-
-      if (users.length > 0) {
-        const response: ServerResponse<object[]> = {
-          isSuccessful: true,
-          displayMessage: 'Fetched the users successfully',
-          description: null,
-          exception: null,
-          data: [users]
-        };
-        res.status(200).json(response);
-        return;
-      }
-      const response: ServerResponse<object[]> = {
-        isSuccessful: false,
-        displayMessage: 'The user/s does not exist.',
-        description: null,
-        exception: null,
-        data: null,
-      };
+    const {text} = req.params;
+    const users = await User.find();
+    const allUsers = users.filter(user => user.firstName.match(text) || user.lastName.match(text) || user.email.match(text));
+    if (allUsers.length == 0) {
+      const response = buildResponse(false, 'The user does NOT exist', null, null, null);
       res.status(404).json(response);
       return;
     }
-    // בודק אם השם משפחה לא NULL
-    if (lastName) {
-      const regex = new RegExp(lastName, 'i');
-      const users = await User.find({ lastName: regex });
-
-      if (users.length > 0) {
-        const response: ServerResponse<object[]> = {
-          isSuccessful: true,
-          displayMessage: 'Fetched the users successfully',
-          description: null,
-          exception: null,
-          data: [users]
-        };
-        res.status(200).json(response);
-        return;
-      }
-      const response: ServerResponse<object[]> = {
-        isSuccessful: false,
-        displayMessage: 'The user/s does not exist.',
-        description: null,
-        exception: null,
-        data: null,
-      };
-      res.status(404).json(response);
-      return;
-    }
-    // בודק אם המייל לא NULL
-    if (email) {
-      const regex = new RegExp(email, 'i');
-      const users = await User.find({ email: regex });
-
-      if (users.length > 0) {
-        const response: ServerResponse<object[]> = {
-          isSuccessful: true,
-          displayMessage: 'Fetched the users successfully',
-          description: null,
-          exception: null,
-          data: [users]
-        };
-        res.status(200).json(response);
-        return;
-      }
-      const response: ServerResponse<object[]> = {
-        isSuccessful: false,
-        displayMessage: 'The user/s does not exist.',
-        description: null,
-        exception: null,
-        data: null,
-      };
-      res.status(404).json(response);
-      return;
-    }
-    // בודק אם הפלאפון לא NULL
-    if (phone) {
-      const regex = new RegExp(phone, 'i');
-      const users = await User.find({ phone: regex });
-
-      if (users.length > 0) {
-        const response: ServerResponse<object[]> = {
-          isSuccessful: true,
-          displayMessage: 'Fetched the users successfully',
-          description: null,
-          exception: null,
-          data: [users]
-        };
-        res.status(200).json(response);
-        return;
-      }
-      const response: ServerResponse<object[]> = {
-        isSuccessful: false,
-        displayMessage: 'The user/s does not exist.',
-        description: null,
-        exception: null,
-        data: null,
-      };
-      res.status(404).json(response);
-      return;
-    }
-    // אם כל השדות היו NULL
-    const response: ServerResponse<object[]> = {
-      isSuccessful: false,
-      displayMessage: 'Please provide at least one search criteria.',
-      description: null,
-      exception: null,
-      data: null,
-    };
-    res.status(400).json(response);
-
+    const response = buildResponse(true, 'Search users successfully', null, null, allUsers);
+    res.status(200).json(response);
     // למקרה ויש ERROR
   } catch (err) {
-    const response: ServerResponse<object[]> = {
-      isSuccessful: false,
-      displayMessage: 'Failed to search users',
-      description: null,
-      exception: err instanceof Error ? err.message : 'Unknown error',
-      data: null,
-    };
+    const response = buildResponse(false, 'Failed to search users', null, err instanceof Error ? err.message : 'Unknown error', null);
     res.status(500).json(response);
   }
 };
@@ -297,11 +188,51 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
       exception: null,
       data: null,
     };
-    res.status(200).json({response})
+    res.status(200).json({ response })
     return;
   } catch (error) {
     res.status(404).json({ message: error })
   }
 }
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail };
+
+
+const exportUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+
+    if (!users || users.length === 0) {
+      throw new Error('לא נמצאו משתמשים');
+    }
+
+    // פורמט את נתוני המשתמשים כך שיכללו רק שדות נחוצים
+    const formattedUsers = users.map(({ _id, firstName, lastName, email, phone }) => ({
+      ID: _id,
+      FirstName: firstName,
+      LastName: lastName,
+      Email: email,
+      Phone: phone,
+    }));
+
+    const ws = utils.json_to_sheet(formattedUsers);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'משתמשים');
+
+    // יצירת Buffer מהקובץ
+    const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' });
+    const base64File = buffer.toString('base64'); // המרת ה-Buffer ל-base64
+
+    // הגדרת התגובה
+    const response = buildResponse(true, 'ייצוא משתמשים הצליח', null, null, base64File);
+    res.status(200).json(response); // שליחת התגובה
+
+  } catch (error) {
+    const response = buildResponse(
+      false, 'נכשל בייצוא המשתמשים', null, error instanceof Error ? error.message : 'שגיאה לא ידועה', null,
+    );
+    res.status(500).json(response);
+  }
+};
+
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers };
