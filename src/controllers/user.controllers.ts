@@ -5,6 +5,7 @@ import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
 import { write, utils } from 'xlsx';
 
+
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
 
@@ -69,8 +70,6 @@ const createUser = async (req: Request, res: Response) => {
     res.status(500).json(response);
   }
 };
-
-
 
 
 // עדכון משתמש קיים
@@ -276,7 +275,7 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
-//delete by email
+//מחיקת משתמש באמצעות אימייל
 const deleteUserByEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
@@ -308,7 +307,7 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
 }
 
 
-
+// ייצוא כל המשתמשים לקובץ אקסל
 const exportUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find();
@@ -345,6 +344,8 @@ const exportUsers = async (req: Request, res: Response) => {
     res.status(500).json(response);
   }
 };
+
+
 
 
 export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers };
