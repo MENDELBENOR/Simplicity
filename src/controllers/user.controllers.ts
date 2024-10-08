@@ -252,7 +252,6 @@ const searchUsers = async (req: Request, res: Response) => {
     }
     // אם כל השדות היו NULL
     const response: ServerResponse<object[]> = {
-    const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Please provide at least one search criteria.',
       description: null,
@@ -261,13 +260,8 @@ const searchUsers = async (req: Request, res: Response) => {
     };
     res.status(400).json(response);
 
-      data: null,
-    };
-    res.status(400).json(response);
-
     // למקרה ויש ERROR
   } catch (err) {
-    const response: ServerResponse<object[]> = {
     const response: ServerResponse<object[]> = {
       isSuccessful: false,
       displayMessage: 'Failed to search users',
