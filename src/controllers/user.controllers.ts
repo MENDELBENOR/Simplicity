@@ -150,8 +150,9 @@ const searchUsers = async (req: Request, res: Response) => {
     const {text} = req.params;
     // בודק שהמשתמש הכניס תוכן
     if (!text) {
-      const response = buildResponse(false, 'You need to insert content', null, null, null);
-      res.status(404).json(response);
+      const users = await User.find();
+      const response = buildResponse(true, 'Search users successfully', null, null, users);
+      res.status(200).json(response);
       return;
     }
     const users = await User.find();
