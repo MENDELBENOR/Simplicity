@@ -7,7 +7,7 @@ const userRouter = express.Router()
 userRouter.get('/getAllUsers', getAllUsers);
 userRouter.post('/createUser', createUser);
 userRouter.patch('/updateUser', updateUser);
-userRouter.get('/searchUser', searchUsers);
+userRouter.get('/searchUser/:text', searchUsers);
 userRouter.delete("/deleteUser", deleteUserByEmail);
 userRouter.get('/export', exportUsers);
 
