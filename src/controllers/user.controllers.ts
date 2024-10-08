@@ -251,8 +251,12 @@ const login = async (req: Request, res: Response)=>{
       return;
     }
     const token = createToken(user._id);
-
-
+    res.cookie('token', token,{
+      httpOnly: true,
+      maxAge: 60 * 60 * 1000
+    })
+    const response = buildResponse(true, 'Login successful', null, null, null);
+    res.status(200).json(response);
   }catch(err){
     const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
     res.status(500).json(response);
