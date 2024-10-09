@@ -251,6 +251,7 @@ const login = async (req: Request, res: Response)=>{
   };
 };
 
+// login With Google
 const loginWithGoogle = async (req: Request, res: Response) => {
   try{
     const { email} = req.body;
