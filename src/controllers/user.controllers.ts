@@ -170,24 +170,11 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
   try {
     const deletedUser = await User.findOneAndDelete({ email });
     if (!deletedUser) {
-
-      const response: ServerResponse<object[]> = {
-        isSuccessful: false,
-        displayMessage: 'User not found',
-        description: null,
-        exception: null,
-        data: null,
-      };
+      const response = buildResponse(false, 'User not found', null, null, null);
       res.status(404).json({ response })
       return;
     }
-    const response: ServerResponse<object[]> = {
-      isSuccessful: true,
-      displayMessage: 'User deleted successfully',
-      description: null,
-      exception: null,
-      data: null,
-    };
+    const response = buildResponse(true, 'User deleted successfully', null, null, null);
     res.status(200).json({ response })
     return;
   } catch (error) {
@@ -233,6 +220,8 @@ const exportUsers = async (req: Request, res: Response) => {
     res.status(500).json(response);
   }
 };
+//logout
+
 
 
 export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers };
