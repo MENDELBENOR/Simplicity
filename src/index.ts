@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRouter from './routes/user.route'
+import cookieParser from 'cookie-parser';
 
 
 // Load environment variables from .env file
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 app.use(cors());
 app.use(express.json()); // To parse incoming JSON requests
+app.use(cookieParser());
 app.use('/api', userRouter);
 
 // Basic GET route
