@@ -231,22 +231,44 @@ const login = async (req: Request, res: Response)=>{
       const response = buildResponse(false, 'The user does NOT exist', null, null, null);
       res.status(401).json(response);
       return;
-    }
+    };
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch){
       const response = buildResponse(false, 'Invalid credentials', null, null, null);
       res.status(401).json(response);
       return;
-    }
+    };
     const token = createToken(user._id);
     res.cookie('token', token,{
       httpOnly: true,
       maxAge: 60 * 60 * 1000
-    })
-    const response = buildResponse(true, 'Login successful', null, null, null);
+    });
+    const response = buildResponse(true, 'Login successful', null, null, user);
     res.status(200).json(response);
   }catch(err){
     const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
+    res.status(500).json(response);
+  };
+};
+
+const loginWithGoogle = async (req: Request, res: Response) => {
+  try{
+    const { email} = req.body;
+    const user = await User.findOne({ email });
+    if(!user){
+      const response = buildResponse(false, 'The user does NOT exist', null, null, null);
+      res.status(401).json(response);
+      return;
+    };
+    const token = createToken(user._id);
+    res.cookie('token', token,{
+      httpOnly: true,
+      maxAge: 60 * 60 * 1000
+    });
+    const response = buildResponse(true, 'Login successful', null, null, user)
+    res.status(200).json(response);
+  }catch (err){
+    const response = buildResponse(false, 'Failed to login', null, err instanceof Error? err.message : 'Unknown error', null);
     res.status(500).json(response);
   }
 }
@@ -273,4 +295,4 @@ const logout = (req: Request, res: Response): void => {
 
 
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout };
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle };
