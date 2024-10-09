@@ -221,9 +221,8 @@ const exportUsers = async (req: Request, res: Response) => {
     res.status(500).json(response);
   }
 };
-//logout
 
-
+//login
 const login = async (req: Request, res: Response)=>{
   try{
     const { email, password} = req.body;
@@ -252,5 +251,26 @@ const login = async (req: Request, res: Response)=>{
   }
 }
 
+//logout
+const logout = (req: Request, res: Response): void => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'strict',
+    });
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login };
+    const response = buildResponse(true, 'Logout successful', null, null, null);
+    res.status(200).json(response);
+
+  } catch (error) {
+    const response = buildResponse(
+      false, 'Failed to logout', null, error instanceof Error ? error.message : 'Unknown error', null
+    );
+    res.status(500).json(response);
+  }
+};
+
+
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout };

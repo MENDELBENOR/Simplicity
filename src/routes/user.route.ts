@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login } from '../controllers/user.controllers';
+import { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout } from '../controllers/user.controllers';
 
 const userRouter = express.Router()
 
@@ -11,5 +11,6 @@ userRouter.get('/searchUser/:text', searchUsers);
 userRouter.delete("/deleteUser", deleteUserByEmail);
 userRouter.get('/export', exportUsers);
 userRouter.post('/login', login);
+userRouter.post('/logout', logout);
 
 export default userRouter;
