@@ -1,9 +1,9 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import userRouter from './routes/user.route'
+import userRouter from './routes/user.route';
+import { authMiddleware } from './middlewares/middel'
 import cookieParser from 'cookie-parser';
-
 
 // Load environment variables from .env file
 dotenv.config();
@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use('/api', userRouter);
 
 // Basic GET route
-app.get('/', (req: Request, res: Response) => {
+app.get('/', authMiddleware, (req: Request, res: Response) => {
   res.send('Hello, World!');
 });
 

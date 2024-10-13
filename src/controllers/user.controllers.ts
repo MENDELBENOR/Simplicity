@@ -73,8 +73,6 @@ const createUser = async (req: Request, res: Response) => {
 };
 
 
-
-
 // עדכון משתמש קיים
 const updateUser = async (req: Request, res: Response) => {
   const { firstName, lastName, phone, _id } = req.body;
@@ -166,7 +164,7 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
-//delete by email
+//מחיקת משתמש באמצעות אימייל
 const deleteUserByEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
@@ -185,7 +183,7 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
 }
 
 
-
+// ייצוא כל המשתמשים לקובץ אקסל
 const exportUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find();
@@ -222,6 +220,8 @@ const exportUsers = async (req: Request, res: Response) => {
     res.status(500).json(response);
   }
 };
+
+
 
 //login
 const login = async (req: Request, res: Response)=>{
