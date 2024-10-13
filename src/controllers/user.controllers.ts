@@ -178,7 +178,7 @@ const deleteUserByEmail = async (req: Request, res: Response) => {
     res.status(200).json({ response })
     return;
   } catch (error) {
-    res.status(404).json({ message: error })
+    res.status(500).json({ message: error })
   }
 }
 
