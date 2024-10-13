@@ -4,7 +4,7 @@ import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
 import { write, utils } from 'xlsx';
-import {createToken} from '../utils/helper'
+import { createToken } from '../utils/helper'
 
 
 // שליפת כל המשתמשים ושליחה לאדמין
@@ -147,7 +147,7 @@ const updateUser = async (req: Request, res: Response) => {
 // פונקציה לחיפוש משתמש
 const searchUsers = async (req: Request, res: Response) => {
   try {
-    const {text} = req.params;
+    const { text } = req.params;
     const users = await User.find();
     const allUsers = users.filter(user => user.firstName.match(text) || user.lastName.match(text) || user.email.match(text));
     if (allUsers.length == 0) {
@@ -224,29 +224,29 @@ const exportUsers = async (req: Request, res: Response) => {
 
 
 //login
-const login = async (req: Request, res: Response)=>{
-  try{
-    const { email, password} = req.body;
+const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if(!user){
+    if (!user) {
       const response = buildResponse(false, 'The user does NOT exist', null, null, null);
       res.status(401).json(response);
       return;
     };
     const isMatch = await bcrypt.compare(password, user.password);
-    if(!isMatch){
+    if (!isMatch) {
       const response = buildResponse(false, 'Invalid credentials', null, null, null);
       res.status(401).json(response);
       return;
     };
     const token = createToken(user._id);
-    res.cookie('token', token,{
+    res.cookie('token', token, {
       httpOnly: true,
       maxAge: 60 * 60 * 1000
     });
     const response = buildResponse(true, 'Login successful', null, null, user);
     res.status(200).json(response);
-  }catch(err){
+  } catch (err) {
     const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
     res.status(500).json(response);
   };
@@ -254,23 +254,23 @@ const login = async (req: Request, res: Response)=>{
 
 // login With Google
 const loginWithGoogle = async (req: Request, res: Response) => {
-  try{
-    const { email} = req.body;
+  try {
+    const { email } = req.body;
     const user = await User.findOne({ email });
-    if(!user){
+    if (!user) {
       const response = buildResponse(false, 'The user does NOT exist', null, null, null);
       res.status(401).json(response);
       return;
     };
     const token = createToken(user._id);
-    res.cookie('token', token,{
+    res.cookie('token', token, {
       httpOnly: true,
       maxAge: 60 * 60 * 1000
     });
     const response = buildResponse(true, 'Login successful', null, null, user)
     res.status(200).json(response);
-  }catch (err){
-    const response = buildResponse(false, 'Failed to login', null, err instanceof Error? err.message : 'Unknown error', null);
+  } catch (err) {
+    const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
     res.status(500).json(response);
   }
 }
@@ -280,7 +280,7 @@ const logout = (req: Request, res: Response): void => {
   try {
     res.clearCookie('token', {
       httpOnly: true,
-      secure: false, 
+      secure: false,
       sameSite: 'strict',
     });
 
@@ -295,6 +295,38 @@ const logout = (req: Request, res: Response): void => {
   }
 };
 
+const getOneUser = async (req: Request, res: Response) => {
+  try {
+    const { USER_ID } = req.body;
+
+    if (!USER_ID) {
+      const response = buildResponse(
+        false, 'Failed to get user', null, "NOT found id", null
+      );
+      res.status(401).json(response);
+      return;
+    }
+
+    const user = await User.findById(USER_ID);
+
+    if (!user) {
+      const response = buildResponse(
+        false, 'Failed to find user', null, "NOT found user", null
+      );
+      res.status(401).json(response);
+      return;
+    }
+
+    const response = buildResponse(true, 'Find user', null, null, user);
+    res.status(200).json(response);
+  } catch (error) {
+    const response = buildResponse(
+      false, 'Failed to find user', null, error instanceof Error ? error.message : 'Unknown error', null
+    );
+    res.status(500).json(response);
+  }
+}
 
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle };
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle, getOneUser };
