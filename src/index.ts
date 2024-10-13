@@ -2,8 +2,10 @@ import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRouter from './routes/user.route';
-import { authMiddleware } from './middlewares/middel'
 import cookieParser from 'cookie-parser';
+import projectRouter from './routes/project.route';
+import groupRouter from './routes/group.route';
+import taskRouter from './routes/task.route';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,17 +20,14 @@ app.use(cors({
   origin: [`http://localhost:5173`],
   credentials: true,
 }));
-app.use(express.json()); // To parse incoming JSON requests
+
+app.use(express.json());
 app.use(cookieParser());
 app.use('/api', userRouter);
+app.use('/project', projectRouter);
+app.use('/group', groupRouter);
+app.use('/task', taskRouter);
 
-// Basic GET route
-app.get('/', authMiddleware, (req: Request, res: Response) => {
-  res.send('Hello, World!');
-});
-
-// Users routes
-app.use('/api/users', userRouter);
 
 
 // Start the server
