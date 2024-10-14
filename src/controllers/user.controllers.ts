@@ -166,16 +166,25 @@ const searchUsers = async (req: Request, res: Response) => {
 
 //מחיקת משתמש באמצעות אימייל
 const deleteUserByEmail = async (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { email } = req.params;
+
   try {
+    if (!email) {
+      const response = buildResponse(
+        false, 'No WEmail for delete', null, 'No matching parameter was received', null
+      );
+
+      res.status(400).json(response);
+      return;
+    }
     const deletedUser = await User.findOneAndDelete({ email });
     if (!deletedUser) {
       const response = buildResponse(false, 'User not found', null, null, null);
-      res.status(404).json({ response })
+      res.status(404).json(response)
       return;
     }
     const response = buildResponse(true, 'User deleted successfully', null, null, null);
-    res.status(200).json({ response })
+    res.status(200).json(response)
     return;
   } catch (error) {
     res.status(500).json({ message: error })
