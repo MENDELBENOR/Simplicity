@@ -1,7 +1,6 @@
 import { ServerResponse } from './types'
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import OTPModel from '../models/otp.schema'
 
@@ -30,9 +29,12 @@ export const createToken = (id: string) => {
   return token;
 }
 
-export const generateOTP = () => {
-   const otp = crypto.randomBytes(3).toString('hex');
-   return otp;
+export const generateOTP = (length = 6) => {
+  let otp = '';
+  for(let i = 0; i < length; i++){
+    otp += Math.floor(Math.random() * 10).toString();
+  }
+  return otp;
 }
 
 const transporter = nodemailer.createTransport({
