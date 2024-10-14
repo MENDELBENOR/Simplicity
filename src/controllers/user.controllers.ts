@@ -163,15 +163,14 @@ const searchUsers = async (req: Request, res: Response) => {
     res.status(500).json(response);
   }
 };
-
-//מחיקת משתמש באמצעות אימייל
+// delete User By Email
 const deleteUserByEmail = async (req: Request, res: Response) => {
   const { email } = req.params;
 
   try {
     if (!email) {
       const response = buildResponse(
-        false, 'No WEmail for delete', null, 'No matching parameter was received', null
+        false, 'No Email for delete', null, 'No matching parameter was received', null
       );
 
       res.status(400).json(response);
