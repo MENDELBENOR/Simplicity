@@ -343,6 +343,8 @@ const getOneUser = async (req: Request, res: Response) => {
 
 
 const otpService = async (req: Request, res: Response) => {
+  console.log("work");
+  
   const { email } = req.body;
   try {
     // ייצור קוד OTP
@@ -367,7 +369,8 @@ const otpService = async (req: Request, res: Response) => {
 const verifyOTP = async (req: Request, res: Response) => {
   try {
     const { email, otp } = req.body;
-
+    console.log(email, "and: ", otp);
+    
     // חפש את ה-OTP במסד הנתונים
     const otpRecord = await OTPModel.findOne({ email, otp });
 
