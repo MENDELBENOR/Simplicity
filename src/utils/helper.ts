@@ -40,15 +40,15 @@ export const generateOTP = (length = 6) => {
 const transporter = nodemailer.createTransport({
   service: 'gmail', // או כל שירות מייל אחר
   auth: {
-    user: 'mendeldinacohen@gmail.com',
-    pass: 'itfb qrlm kyzb hjch',
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_CODE,
   },
 });
 
 export const sendEmail = async (email : string, otp: string) => {
   
   const mailOptions = {
-    from: 'mendeldinacohen@gmail.com',
+    from: process.env.EMAIL,
     to: email,
     subject: 'Your OTP Code',
     text: `Your OTP code is ${otp}`,
