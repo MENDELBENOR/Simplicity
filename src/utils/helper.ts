@@ -1,6 +1,9 @@
 import { ServerResponse } from './types'
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+import OTPModel from '../models/otp.schema'
 
 dotenv.config();
 
@@ -26,3 +29,34 @@ export const createToken = (id: string) => {
   const token = jwt.sign({ id: id }, process.env.JWT_SECRET as string, { expiresIn: '1d' });
   return token;
 }
+
+export const generateOTP = () => {
+   const otp = crypto.randomBytes(3).toString('hex');
+   return otp;
+}
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // או כל שירות מייל אחר
+  auth: {
+    user: 'mendeldinacohen@gmail.com',
+    pass: 'itfb qrlm kyzb hjch',
+  },
+});
+
+export const sendEmail = async (email : string, otp: string) => {
+  
+  const mailOptions = {
+    from: 'mendeldinacohen@gmail.com',
+    to: email,
+    subject: 'Your OTP Code',
+    text: `Your OTP code is ${otp}`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+export const saveOTPToDB = async (email: string, otp: string) => {
+  const expirationTime = Date.now() + 300000; // 5 דקות תוקף
+  // כאן תוסיף את הקוד למסד הנתונים
+  await OTPModel.create({ email, otp, expiresAt: expirationTime });
+};
