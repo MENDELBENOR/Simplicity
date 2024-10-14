@@ -4,8 +4,12 @@ import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
 import { write, utils } from 'xlsx';
-import {createToken} from '../utils/helper'
-
+import {createToken} from '../utils/helper';
+import {generateOTP} from '../utils/helper';
+import {sendEmail} from '../utils/helper';
+import {saveOTPToDB} from '../utils/helper';
+import OTPModel from '../models/otp.schema'
+import { stringify } from 'querystring';
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -297,4 +301,61 @@ const logout = (req: Request, res: Response): void => {
 
 
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle };
+
+const otpService = async (req:Request, res: Response) => {
+  const { email } = req.body;
+  try {
+    // ייצור קוד OTP
+  const otp = generateOTP();
+  console.log(otp);
+  // שליחת הקוד למייל
+    await sendEmail(email, otp);
+    
+    const response = buildResponse(true,'OTP sent to email', null,null, null);
+    res.status(200).json(response);
+
+    // כאן תוכל לשמור את ה-OTP במסד הנתונים עם תוקף
+    saveOTPToDB(email, otp);
+  } catch (error) {
+    console.error(error);
+    const response = buildResponse(false,'Failed to send OTP', null,error instanceof Error ? error.message : 'Unknown error', null);
+    res.status(500).json(response);
+  }
+};
+
+
+const verifyOTP = async (req: Request, res: Response) => {
+  try{
+    const { email, otp } = req.body;
+
+  // חפש את ה-OTP במסד הנתונים
+  const otpRecord = await OTPModel.findOne({ email, otp });
+
+  if (!otpRecord) {
+    const response = buildResponse(false,'Invalid OTP', null,null, null);
+    res.status(400).json(response);
+    return;
+  }
+
+  // בדוק אם ה-OTP עדיין בתוקף
+  if (Date.now() > otpRecord.expiresAt.getTime()) {
+    const response = buildResponse(false,'OTP has expired', null,null, null);
+    res.status(400).json(response);
+    return;
+  }
+
+  // אם ה-OTP נכון ולא פג תוקף
+  const response = buildResponse(true,'OTP verified', null,null, null);
+  res.status(200).json(response);
+
+  // אם אתה רוצה למחוק את ה-OTP אחרי האימות, תוכל לעשות זאת:
+  await OTPModel.deleteOne({ email, otp });
+  }catch(error){
+    const response = buildResponse(false,'Failed to login', null, error instanceof Error ? error.message : 'Unknown error', null);
+    res.status(500).json(response);
+  }
+};
+
+
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle,  otpService, verifyOTP};

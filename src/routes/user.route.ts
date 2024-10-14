@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle } from '../controllers/user.controllers';
+import { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle, otpService, verifyOTP } from '../controllers/user.controllers';
 
 const userRouter = express.Router()
 
@@ -13,5 +13,7 @@ userRouter.get('/export', exportUsers);
 userRouter.post('/login', login);
 userRouter.post('/logout', logout);
 userRouter.post('/loginWithGoogle', loginWithGoogle);
+userRouter.post('/otpService', otpService);
+userRouter.post('/verifyOTP', verifyOTP);
 
 export default userRouter;
