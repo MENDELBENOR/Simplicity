@@ -345,9 +345,14 @@ const getOneUser = async (req: Request, res: Response) => {
 const otpService = async (req:Request, res: Response) => {
   const { email } = req.body;
   try {
+    const user = await User.findOne({email});
+    if(!user){
+      const response = buildResponse(false,'User does not found', null,null, null);
+      res.status(401).json(response);
+      return;
+    }
     // ייצור קוד OTP
   const otp = generateOTP();
-  console.log(otp);
   // שליחת הקוד למייל
     await sendEmail(email, otp);
     
@@ -357,7 +362,6 @@ const otpService = async (req:Request, res: Response) => {
     // כאן תוכל לשמור את ה-OTP במסד הנתונים עם תוקף
     saveOTPToDB(email, otp);
   } catch (error) {
-    console.error(error);
     const response = buildResponse(false,'Failed to send OTP', null,error instanceof Error ? error.message : 'Unknown error', null);
     res.status(500).json(response);
   }
