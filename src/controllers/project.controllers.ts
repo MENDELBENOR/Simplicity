@@ -70,6 +70,23 @@ const updateProject = async (req: Request, res: Response) => {
    }
 };
 
+const getAllProjects = async(req: Request, res: Response)=>{
+    try{
+        const projects = await Project.find();
+        if(projects.length === 0){
+            const response = buildResponse(false, 'No projects found', null, null, null);
+            res.status(400).json(response);
+            return;
+        }
+        const response = buildResponse(true, 'Projects found successfully', null, null, projects);
+        res.status(200).json(response);
+    }catch(error){
+        const response = buildResponse(false, 'Failed to get projects', null, error instanceof Error? error.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+    
+
+}
 
 
-export { createProject, updateProject };
+export { createProject, updateProject, getAllProjects };
