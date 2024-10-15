@@ -20,6 +20,7 @@ const createProject = async (req: Request, res: Response) => {
     try {
         // checks if the project exists
         const existingProject = await Project.findOne({ name });
+        
         if (existingProject) {
             const response = buildResponse(false, 'Project already exists', null, null, null);
             res.status(409).json(response);
