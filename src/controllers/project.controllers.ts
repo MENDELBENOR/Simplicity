@@ -44,7 +44,7 @@ const createProject = async (req: Request, res: Response) => {
 
 const updateProject = async (req: Request, res: Response) => {
     const { name, description, icon, _id } = req.body;
-    if(!name || !description || !icon){
+    if(!name || !description){
         const response = buildResponse(false, 'Please provide all the required fields', null, 'One of the fields (or more) is missing', null);
         res.status(400).json(response);
         return;
