@@ -4,16 +4,13 @@ import { buildResponse } from '../utils/helper';
 
 const getGroupsByProject = async (req: Request, res: Response) => {
     const { _id } = req.params;
-
     if (!_id) {
         const response = buildResponse(false, "id is NOT valid", null, null);
         res.status(400).send(response);
         return;
     }
-
     try {
         const groups = await Group.find();
-
         const groupByProject = groups.filter((group) => group.projectId === _id);
 
         if (groups.length === 0 || groupByProject.length === 0) {
@@ -21,7 +18,6 @@ const getGroupsByProject = async (req: Request, res: Response) => {
             res.status(400).send(response);
             return;
         }
-
         const response = buildResponse(true, "we found the groups", null, null, groupByProject);
         res.status(200).send(response);
         return;
