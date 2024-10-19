@@ -164,7 +164,7 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
-//מחיקת משתמש באמצעות אימייל
+//Delete a user by email //
 const deleteUserByEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
