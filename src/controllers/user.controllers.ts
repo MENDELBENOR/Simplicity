@@ -4,8 +4,12 @@ import User from '../models/user.schema';
 import { buildResponse } from '../utils/helper';
 import { ServerResponse } from '../utils/types';
 import { write, utils } from 'xlsx';
-import { createToken } from '../utils/helper'
-
+import { createToken } from '../utils/helper';
+import { generateOTP } from '../utils/helper';
+import { sendEmail } from '../utils/helper';
+import { saveOTPToDB } from '../utils/helper';
+import OTPModel from '../models/otp.schema'
+import { stringify } from 'querystring';
 
 // שליפת כל המשתמשים ושליחה לאדמין
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -166,16 +170,25 @@ const searchUsers = async (req: Request, res: Response) => {
 
 //Delete a user by email //
 const deleteUserByEmail = async (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { email } = req.params;
+
   try {
+    if (!email) {
+      const response = buildResponse(
+        false, 'No Email for delete', null, 'No matching parameter was received', null
+      );
+
+      res.status(400).json(response);
+      return;
+    }
     const deletedUser = await User.findOneAndDelete({ email });
     if (!deletedUser) {
       const response = buildResponse(false, 'User not found', null, null, null);
-      res.status(404).json({ response })
+      res.status(404).json(response)
       return;
     }
     const response = buildResponse(true, 'User deleted successfully', null, null, null);
-    res.status(200).json({ response })
+    res.status(200).json(response)
     return;
   } catch (error) {
     res.status(500).json({ message: error })
@@ -306,9 +319,7 @@ const getOneUser = async (req: Request, res: Response) => {
       res.status(401).json(response);
       return;
     }
-
     const user = await User.findById(USER_ID);
-
     if (!user) {
       const response = buildResponse(
         false, 'Failed to find user', null, "NOT found user", null
@@ -316,7 +327,6 @@ const getOneUser = async (req: Request, res: Response) => {
       res.status(401).json(response);
       return;
     }
-
     const response = buildResponse(true, 'Find user', null, null, user);
     res.status(200).json(response);
   } catch (error) {
@@ -329,4 +339,65 @@ const getOneUser = async (req: Request, res: Response) => {
 
 
 
-export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle, getOneUser };
+
+const otpService = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      const response = buildResponse(false, 'User does not found', null, null, null);
+      res.status(401).json(response);
+      return;
+    }
+    // ייצור קוד OTP
+    const otp = generateOTP();
+    // שליחת הקוד למייל
+    await sendEmail(email, otp);
+
+    const response = buildResponse(true, 'OTP sent to email', null, null, null);
+    res.status(200).json(response);
+
+    // כאן תוכל לשמור את ה-OTP במסד הנתונים עם תוקף
+    saveOTPToDB(email, otp);
+  } catch (error) {
+    const response = buildResponse(false, 'Failed to send OTP', null, error instanceof Error ? error.message : 'Unknown error', null);
+    res.status(500).json(response);
+  }
+};
+
+
+const verifyOTP = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+
+    // חפש את ה-OTP במסד הנתונים
+    const otpRecord = await OTPModel.findOne({ email, otp });
+
+    if (!otpRecord) {
+      const response = buildResponse(false, 'Invalid OTP', null, null, null);
+      res.status(400).json(response);
+      return;
+    }
+
+    // בדוק אם ה-OTP עדיין בתוקף
+    if (Date.now() > otpRecord.expiresAt.getTime()) {
+      const response = buildResponse(false, 'OTP has expired', null, null, null);
+      res.status(400).json(response);
+      return;
+    }
+
+    // אם ה-OTP נכון ולא פג תוקף
+    const response = buildResponse(true, 'OTP verified', null, null, null);
+    res.status(200).json(response);
+
+    // אם אתה רוצה למחוק את ה-OTP אחרי האימות, תוכל לעשות זאת:
+    await OTPModel.deleteOne({ email, otp });
+  } catch (error) {
+    const response = buildResponse(false, 'Failed to login', null, error instanceof Error ? error.message : 'Unknown error', null);
+    res.status(500).json(response);
+  }
+};
+
+
+
+export { getAllUsers, createUser, searchUsers, updateUser, deleteUserByEmail, exportUsers, login, logout, loginWithGoogle, otpService, verifyOTP, getOneUser };
