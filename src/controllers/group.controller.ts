@@ -53,5 +53,40 @@ const createGroup = async (req: Request, res: Response) => {
     }
 };
 
-export { getGroupsByProject, createGroup }
+// Update a Group //
+const updateGroup = async (req: Request, res: Response) => {
+    const { name, description, _id } = req.body;
+
+    // Checking required fields    
+    if (!name || !description) {
+        const response = buildResponse(false, 'Please provide all the required fields', null, 'One or more fields are missing', null);
+        res.status(400).json(response);
+        return;
+    }
+
+    try {
+        // Group search by ID       
+        const group = await Group.findById(_id);
+
+        if (!group) {
+            const response = buildResponse(false, 'Group not found', null, null, null);
+            res.status(404).json(response);
+            return;
+        }
+
+        group.name = name;
+        group.description = description;
+
+        await group.save();
+
+        const response = buildResponse(true, 'Group updated successfully', null, null, group);
+        res.status(200).json(response);
+    } catch (error) {
+        const response = buildResponse(false, 'Failed to create group', null, error instanceof Error ? error.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+};
+
+
+export { getGroupsByProject, createGroup, updateGroup }
 
