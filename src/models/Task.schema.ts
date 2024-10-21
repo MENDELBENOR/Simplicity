@@ -11,7 +11,7 @@ const tsakSchema: Schema = new Schema({
     },
     status: {
         type: String,
-        enum: ['TO DO', 'IN_PROGRESS', 'COMPLETED'],
+        enum: ['TO DO', 'IN PROGRESS', 'COMPLETE'],
         default: 'TO DO',
         required: true
     },

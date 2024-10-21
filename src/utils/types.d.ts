@@ -23,14 +23,11 @@ export interface ServerResponse<T> {
 export interface ITask {
     name: string;
     description: string;
-    status: STATUS;
+    status: "TO DO" | "IN PROGRESS" | "COMPLETE";
     duration: number;
-    groupId: string
+    groupId: string;
 }
 
-export type STATUS = {
-    status: "TO DO" | "IN PROGRESS" | "COMPLETE";
-}
 
 export interface IGroup {
     name: string;
