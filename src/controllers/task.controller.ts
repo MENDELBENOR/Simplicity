@@ -71,4 +71,55 @@ export const createTask = async (req: Request, res: Response) => {
         );
         res.status(500).json(response);
     }
+
+}
+
+export const editTask = async (req: Request, res: Response) => {
+    const { taskId, data, type } = req.body;
+
+    if (!taskId || !data || !type) {
+        const response = buildResponse(false, "Fullfild the data!", null, null);
+        res.status(400).send(response);
+        return;
+    }
+
+    try {
+
+        const task = await Task.findById(taskId);
+
+        if (!task) {
+            const response = buildResponse(false, "We NOT find the task!", null, null);
+            res.status(400).send(response);
+            return;
+        }
+
+        if (type === "name")
+            task.name = data;
+        else if (type === "description")
+            task.description = data;
+        else if (type === "status")
+            task.status = data;
+        else if (type === "duration") {
+            if (data <= 0) {
+                const response = buildResponse(false, "The duration most be positive!", null, null);
+                res.status(400).send(response);
+                return;
+            }
+            task.duration = data;
+        }
+
+        await task.save();
+
+        const response = buildResponse(true, `update ${type} succefully!`, null, null, task);
+        res.status(200).send(response);
+        return;
+
+
+    } catch (error) {
+        const response = buildResponse(
+            false, 'Failed to create task', null, error instanceof Error ? error.message : 'Unknown error', null,
+        );
+        res.status(500).json(response);
+    }
+
 }
