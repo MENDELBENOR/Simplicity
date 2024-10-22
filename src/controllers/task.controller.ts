@@ -123,3 +123,33 @@ export const editTask = async (req: Request, res: Response) => {
     }
 
 }
+
+export const deleteTask = async (req: Request, res: Response) => {
+    const { id } = req.body;
+
+    if (!id) {
+        const response = buildResponse(false, "Task ID must be provided!", null, null);
+        res.status(400).send(response);
+        return;
+    }
+
+    try {
+        const taskToDelete = await Task.findById(id);
+
+        if (!taskToDelete) {
+            const response = buildResponse(false, "Task not found!", null, null);
+            res.status(404).send(response);
+            return;
+        }
+
+        await taskToDelete.deleteOne();
+
+        const response = buildResponse(true, "Task deleted successfully!", null, null, taskToDelete);
+        res.status(200).send(response);
+    } catch (error) {
+        const response = buildResponse(
+            false, 'Failed to delete task', null, error instanceof Error ? error.message : 'Unknown error', null
+        );
+        res.status(500).json(response);
+    }
+};
