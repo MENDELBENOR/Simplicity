@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { buildResponse } from '../utils/helper';
 import Task from '../models/Task.schema';
-import Group from '../models/Gruop.schema';
+import Group from '../models/Group.schema';
 
 export const getTaskByGroup = async (req: Request, res: Response) => {
     const { _id } = req.params;
