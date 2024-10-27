@@ -5,6 +5,6 @@ const groupRouter = express.Router();
 
 groupRouter.get('/getGroupsByProject/:_id', getGroupsByProject);
 groupRouter.post('/createGroup', createGroup);
-groupRouter.post('/updateGroup', updateGroup);
+groupRouter.patch('/updateGroup/:_id', updateGroup);
 
 export default groupRouter;

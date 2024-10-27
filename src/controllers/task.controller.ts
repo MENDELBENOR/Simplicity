@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { buildResponse } from '../utils/helper';
 import Task from '../models/Task.schema';
-import Group from '../models/Gruop.schema';
+import Group from '../models/Group.schema';
 
 export const getTaskByGroup = async (req: Request, res: Response) => {
     const { _id } = req.params;
@@ -71,4 +71,85 @@ export const createTask = async (req: Request, res: Response) => {
         );
         res.status(500).json(response);
     }
+
 }
+
+export const editTask = async (req: Request, res: Response) => {
+    const { taskId, data, type } = req.body;
+
+    if (!taskId || !data || !type) {
+        const response = buildResponse(false, "Fullfild the data!", null, null);
+        res.status(400).send(response);
+        return;
+    }
+
+    try {
+
+        const task = await Task.findById(taskId);
+
+        if (!task) {
+            const response = buildResponse(false, "We NOT find the task!", null, null);
+            res.status(400).send(response);
+            return;
+        }
+
+        if (type === "name")
+            task.name = data;
+        else if (type === "description")
+            task.description = data;
+        else if (type === "status")
+            task.status = data;
+        else if (type === "duration") {
+            if (data <= 0) {
+                const response = buildResponse(false, "The duration most be positive!", null, null);
+                res.status(400).send(response);
+                return;
+            }
+            task.duration = data;
+        }
+
+        await task.save();
+
+        const response = buildResponse(true, `update ${type} succefully!`, null, null, task);
+        res.status(200).send(response);
+        return;
+
+
+    } catch (error) {
+        const response = buildResponse(
+            false, 'Failed to create task', null, error instanceof Error ? error.message : 'Unknown error', null,
+        );
+        res.status(500).json(response);
+    }
+
+}
+
+export const deleteTask = async (req: Request, res: Response) => {
+    const { id } = req.body;
+
+    if (!id) {
+        const response = buildResponse(false, "Task ID must be provided!", null, null);
+        res.status(400).send(response);
+        return;
+    }
+
+    try {
+        const taskToDelete = await Task.findById(id);
+
+        if (!taskToDelete) {
+            const response = buildResponse(false, "Task not found!", null, null);
+            res.status(404).send(response);
+            return;
+        }
+
+        await taskToDelete.deleteOne();
+
+        const response = buildResponse(true, "Task deleted successfully!", null, null, taskToDelete);
+        res.status(200).send(response);
+    } catch (error) {
+        const response = buildResponse(
+            false, 'Failed to delete task', null, error instanceof Error ? error.message : 'Unknown error', null
+        );
+        res.status(500).json(response);
+    }
+};

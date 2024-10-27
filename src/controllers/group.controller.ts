@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Group from '../models/Gruop.schema';
+import Group from '../models/Group.schema';
 import { buildResponse } from '../utils/helper';
 
 const getGroupsByProject = async (req: Request, res: Response) => {
@@ -65,28 +65,20 @@ const updateGroup = async (req: Request, res: Response) => {
     }
 
     try {
-        // Group search by ID       
-        const group = await Group.findById(_id);
-
-        if (!group) {
+        const updatedGroup = await Group.findByIdAndUpdate(_id, { name, description }, { new: true });
+        if (!updatedGroup) {
             const response = buildResponse(false, 'Group not found', null, null, null);
             res.status(404).json(response);
             return;
         }
-
-        group.name = name;
-        group.description = description;
-
-        await group.save();
-
-        const response = buildResponse(true, 'Group updated successfully', null, null, group);
+        const response = buildResponse(true, 'Group updated successfully', null, null, updatedGroup);
         res.status(200).json(response);
+
     } catch (error) {
-        const response = buildResponse(false, 'Failed to create group', null, error instanceof Error ? error.message : 'Unknown error', null);
+        const response = buildResponse(false, 'Failed to update group', null, error instanceof Error ? error.message : 'Unknown error', null);
         res.status(500).json(response);
     }
 };
-
 
 export { getGroupsByProject, createGroup, updateGroup }
 
