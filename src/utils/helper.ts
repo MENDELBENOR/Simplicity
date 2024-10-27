@@ -6,7 +6,8 @@ import OTPModel from '../models/otp.schema'
 
 dotenv.config();
 
-export const buildResponse = <T>(
+export const 
+buildResponse = <T>(
   isSuccessful: boolean = false,
   displayMessage: string = 'Unknown message',
   description: string | null,

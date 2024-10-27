@@ -87,7 +87,35 @@ const getAllProjects = async(req: Request, res: Response)=>{
     }
     
 
+};
+
+const deleteProject = async (req: Request, res: Response) => {
+    const { projectId } = req.body;
+    
+    try {
+        if (!projectId) {
+          const response = buildResponse(
+            false, 'No ID for delete', null, 'No matching parameter was received', null
+          );
+    
+          res.status(400).json(response);
+          return;
+        }
+        const deletedProject = await Project.findByIdAndDelete( projectId );
+        
+        if (!deletedProject) {
+          const response = buildResponse(false, 'Project not found', null, null, null);
+          res.status(404).json(response)
+          return;
+        }
+        const response = buildResponse(true, 'Project deleted successfully', null, null, null);
+        res.status(200).json(response)
+        return;
+      } catch (error) {
+        const response = buildResponse(true, 'Error in delete project', null, null, null);
+        res.status(500).json(response);
+      }
 }
 
 
-export { createProject, updateProject, getAllProjects };
+export { createProject, updateProject, getAllProjects, deleteProject };
