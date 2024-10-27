@@ -80,5 +80,30 @@ const updateGroup = async (req: Request, res: Response) => {
     }
 };
 
-export { getGroupsByProject, createGroup, updateGroup }
+//Delete a Group //
+const deleteGroup = async (req: Request, res: Response) => {
+    const { name } = req.body;
+
+    try {
+        if (!name) {
+            const response = buildResponse(
+                false, 'No Group for delete', null, 'No matching parameter was received', null);
+            res.status(400).json(response);
+            return;
+        }
+        const deletedGroup = await Group.findOneAndDelete({ name });
+        if (!deletedGroup) {
+            const response = buildResponse(false, 'Group not found', null, null, null);
+            res.status(404).json(response)
+            return;
+        }
+        const response = buildResponse(true, 'Group deleted successfully', null, null, null);
+        res.status(200).json(response);
+    } catch (error) {
+        const response = buildResponse(false, 'Failed to delete group', null, error instanceof Error ? error.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+}
+
+export { getGroupsByProject, createGroup, updateGroup, deleteGroup }
 
