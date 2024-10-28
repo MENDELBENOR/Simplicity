@@ -165,25 +165,25 @@ export const deleteTask = async (req: Request, res: Response) => {
 
 
 // export task list
-export const exportTaskList =  async (req: Request, res: Response) => {
+export const exportTaskList = async (req: Request, res: Response) => {
     const { _id } = req.body;
-    
+
     try {
-        const tasksList = await Task.find( { groupId: _id });   
+        const tasksList = await Task.find({ groupId: _id });
         console.log(tasksList);
-        
+
         if (!tasksList || tasksList.length === 0) {
             throw new Error("No tasks found");
         }
 
-        const formattedTasks = tasksList.map(( task, index) => ({
+        const formattedTasks = tasksList.map((task, index) => ({
             ID: (index + 1).toString(),
             Name: task.name,
             Description: task.description,
             Status: task.status,
             Duration: task.duration,
         }));
-        
+
 
         const ws = utils.json_to_sheet(formattedTasks);
         const wb = utils.book_new();
@@ -197,17 +197,45 @@ export const exportTaskList =  async (req: Request, res: Response) => {
             { wch: 10 },   // משך
         ];
 
-        const buffer = write(wb, {bookType: 'xlsx', type: 'buffer'});
+        const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' });
         const base64File = buffer.toString('base64');
-        
+
         const response = buildResponse(true, 'Task export succeeded', null, null, base64File);
-        res.status(200).json(response); 
+        res.status(200).json(response);
 
     } catch (error) {
         const response = buildResponse(
-          false, 'Error when exporting tasks', null, error instanceof Error ? error.message :'Unknown error', null,
+            false, 'Error when exporting tasks', null, error instanceof Error ? error.message : 'Unknown error', null,
         );
         res.status(500).json(response);
-      }
-    };
+    }
+};
 
+
+//search tasks
+export const searchTask = async (req: Request, res: Response) => {
+
+    try {
+        const { text } = req.params;
+
+        const regex = new RegExp(text, 'i');
+
+        const matchesTasks = await Task.find({
+            $or: [
+                { name: regex },
+                { description: regex },
+                { status: regex }
+            ]
+        });
+
+        if (!matchesTasks || matchesTasks.length === 0) {
+            throw new Error("There are no matching tasks");
+        }
+        const response = buildResponse(true, 'Search tasks successfully', null, null, matchesTasks);
+        res.status(200).json(response);
+
+    } catch (err) {
+        const response = buildResponse(false, 'Failed to search tasks', null, err instanceof Error ? err.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+};
