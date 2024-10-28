@@ -61,9 +61,10 @@ const createUser = async (req: Request, res: Response) => {
     // יצירת משתמש חדש
     // הצפנה של הקוד
     let newPassword: string = await bcrypt.hash(password, 10);
-
+    
     let newUser = new User({ firstName, lastName, email, phone, password: newPassword, icon });
     await newUser.save();
+    
     newUser.password = '*****';
     const response = buildResponse(true, 'New user successfully created', null, null, newUser)
     res.status(200).json(response);
@@ -206,17 +207,28 @@ const exportUsers = async (req: Request, res: Response) => {
     }
 
     // פורמט את נתוני המשתמשים כך שיכללו רק שדות נחוצים
-    const formattedUsers = users.map(({ _id, firstName, lastName, email, phone }) => ({
-      ID: _id,
-      FirstName: firstName,
-      LastName: lastName,
-      Email: email,
-      Phone: phone,
+    const formattedUsers = users.map(( user, index) => ({
+      ID: (index + 1).toString(),
+      FirstName: user.firstName,
+      LastName: user.lastName,
+      Email: user.email,
+      Phone: user.phone,
     }));
+
+
+
 
     const ws = utils.json_to_sheet(formattedUsers);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'משתמשים');
+
+    ws['!cols'] = [
+      { wch: 5 },    // מספר משימה - עמודה צרה יותר
+      { wch: 15 },   // שם משימה
+      { wch: 15 },   // תיאור
+      { wch: 25 },   // סטטוס
+      { wch: 20 },   // משך
+  ];
 
     // יצירת Buffer מהקובץ
     const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' });
@@ -344,6 +356,7 @@ const otpService = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
+    
     if (!user) {
       const response = buildResponse(false, 'User does not found', null, null, null);
       res.status(401).json(response);
@@ -352,7 +365,13 @@ const otpService = async (req: Request, res: Response) => {
     // ייצור קוד OTP
     const otp = generateOTP();
     // שליחת הקוד למייל
-    await sendEmail(email, otp);
+    try{
+      await sendEmail(email, otp);
+    } catch(err){
+      console.log("error is------", err);
+      
+    }
+  
 
     const response = buildResponse(true, 'OTP sent to email', null, null, null);
     res.status(200).json(response);

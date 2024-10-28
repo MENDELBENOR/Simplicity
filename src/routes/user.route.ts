@@ -18,7 +18,7 @@ userRouter.get('/getAllUsers', authMiddleware, getAllUsers);
 userRouter.patch('/updateUser', authMiddleware, updateUser);
 userRouter.get('/searchUser/:text', authMiddleware, searchUsers);
 userRouter.delete("/deleteUser/:email", authMiddleware, deleteUserByEmail);
-userRouter.get('/export', authMiddleware, exportUsers);
+userRouter.post('/export', authMiddleware, exportUsers);
 userRouter.get('/revalidate', authMiddleware, getOneUser);
 
 

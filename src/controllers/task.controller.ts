@@ -2,7 +2,10 @@ import { Request, Response } from 'express';
 import { buildResponse } from '../utils/helper';
 import Task from '../models/Task.schema';
 import Group from '../models/Group.schema';
+import { write, utils } from 'xlsx';
 
+
+// get task by group
 export const getTaskByGroup = async (req: Request, res: Response) => {
     const { _id } = req.params;
 
@@ -32,6 +35,8 @@ export const getTaskByGroup = async (req: Request, res: Response) => {
     }
 }
 
+
+// create task
 export const createTask = async (req: Request, res: Response) => {
     const { name, description, status, duration, groupId } = req.body;
 
@@ -74,6 +79,8 @@ export const createTask = async (req: Request, res: Response) => {
 
 }
 
+
+//edit task
 export const editTask = async (req: Request, res: Response) => {
     const { taskId, data, type } = req.body;
 
@@ -124,6 +131,8 @@ export const editTask = async (req: Request, res: Response) => {
 
 }
 
+
+// delete task
 export const deleteTask = async (req: Request, res: Response) => {
     const { id } = req.body;
 
@@ -153,3 +162,52 @@ export const deleteTask = async (req: Request, res: Response) => {
         res.status(500).json(response);
     }
 };
+
+
+// export task list
+export const exportTaskList =  async (req: Request, res: Response) => {
+    const { _id } = req.body;
+    
+    try {
+        const tasksList = await Task.find( { groupId: _id });   
+        console.log(tasksList);
+        
+        if (!tasksList || tasksList.length === 0) {
+            throw new Error("No tasks found");
+        }
+
+        const formattedTasks = tasksList.map(( task, index) => ({
+            ID: (index + 1).toString(),
+            Name: task.name,
+            Description: task.description,
+            Status: task.status,
+            Duration: task.duration,
+        }));
+        
+
+        const ws = utils.json_to_sheet(formattedTasks);
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, 'Tasks');
+
+        ws['!cols'] = [
+            { wch: 5 },    // מספר משימה - עמודה צרה יותר
+            { wch: 20 },   // שם משימה
+            { wch: 40 },   // תיאור
+            { wch: 15 },   // סטטוס
+            { wch: 10 },   // משך
+        ];
+
+        const buffer = write(wb, {bookType: 'xlsx', type: 'buffer'});
+        const base64File = buffer.toString('base64');
+        
+        const response = buildResponse(true, 'Task export succeeded', null, null, base64File);
+        res.status(200).json(response); 
+
+    } catch (error) {
+        const response = buildResponse(
+          false, 'Error when exporting tasks', null, error instanceof Error ? error.message :'Unknown error', null,
+        );
+        res.status(500).json(response);
+      }
+    };
+
