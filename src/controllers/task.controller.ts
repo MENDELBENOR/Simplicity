@@ -3,6 +3,8 @@ import { buildResponse } from '../utils/helper';
 import Task from '../models/Task.schema';
 import Group from '../models/Group.schema';
 import { write, utils } from 'xlsx';
+import User from '../models/user.schema';
+import { IUser } from '../utils/types';
 
 
 // get task by group
@@ -239,3 +241,113 @@ export const searchTask = async (req: Request, res: Response) => {
         res.status(500).json(response);
     }
 };
+
+export const getTaskByUser = async (req: Request, res: Response) => {
+    const { _id } = req.params;
+
+    if (!_id) {
+        const response = buildResponse(false, "ID is not valid", null, null);
+        res.status(400).send(response);
+        return;
+    }
+
+    try {
+        const user = await User.findById(_id);
+
+        if (!user) {
+            const response = buildResponse(false, "User not found", null, null);
+            res.status(400).send(response);
+            return;
+        }
+
+        // Use Promise.all to wait for all task fetches to resolve
+        const tasks = await Promise.all(
+            user.workSpaceList.map(async (taskId) => {
+                const task = await Task.findById(taskId);
+                return task;
+            })
+        );
+
+        const response = buildResponse(true, 'Tasks retrieved successfully', null, null, tasks);
+        res.status(200).json(response);
+
+    } catch (err) {
+        const response = buildResponse(false, 'Failed to get tasks', null, err instanceof Error ? err.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+};
+
+
+export const assignTaskToUser = async (req: Request, res: Response) => {
+    const { userId, taskId } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            const response = buildResponse(false, "User not found", null, null);
+            res.status(400).send(response);
+            return;
+        }
+
+        const task = await Task.findById(taskId);
+
+        if (!task) {
+            const response = buildResponse(false, "Task not found", null, null);
+            res.status(400).send(response);
+            return;
+        }
+
+        const taskIndex = user.workSpaceList.indexOf(taskId);
+
+        if (taskIndex !== -1) {
+            user.workSpaceList.splice(taskIndex, 1);
+            await user.save();
+
+            const response = buildResponse(true, `${user.email} removed from list`, null, null, null);
+            res.status(200).send(response);
+            return;
+        }
+
+        user.workSpaceList.push(taskId);
+        await user.save();
+
+        const response = buildResponse(true, `task assin to ${user.email}`, null, null, user);
+        res.status(200).json(response);
+        return;
+
+    } catch (err) {
+        const response = buildResponse(false, 'Failed to search tasks', null, err instanceof Error ? err.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+};
+
+export const getUsersWithTask = async (req: Request, res: Response) => {
+    const { taskId } = req.params;
+
+    if (!taskId) {
+        const response = buildResponse(false, "Task ID is required", null, null);
+        res.status(400).send(response);
+        return;
+    }
+
+    try {
+        // Find users whose workSpaceList includes the given taskId
+        const users = await User.find({ workSpaceList: taskId });
+
+        if (users.length === 0) {
+            const response = buildResponse(false, "No users found with this task", null, null);
+            res.status(404).send(response);
+            return;
+        }
+
+        const response = buildResponse(true, 'Users found with the specified task', null, null, users);
+        res.status(200).json(response);
+
+    } catch (err) {
+        const response = buildResponse(false, 'Failed to retrieve users', null, err instanceof Error ? err.message : 'Unknown error', null);
+        res.status(500).json(response);
+    }
+};
+
+

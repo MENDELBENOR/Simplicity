@@ -1,5 +1,5 @@
 import express from "express";
-import { createTask, deleteTask, editTask, getTaskByGroup, exportTaskList, searchTask } from '../controllers/task.controller';
+import { createTask, deleteTask, editTask, getTaskByGroup, exportTaskList, searchTask, getTaskByUser, assignTaskToUser, getUsersWithTask, } from '../controllers/task.controller';
 
 const taskRouter = express.Router();
 
@@ -9,6 +9,10 @@ taskRouter.post('/updateTask', editTask);
 taskRouter.post('/deleteTask', deleteTask);
 taskRouter.post('/exportTaskList', exportTaskList);
 taskRouter.get('/searchTask/:text', searchTask);
+taskRouter.get('/getTaskByUser/:_id', getTaskByUser);
+taskRouter.post('/assignTaskToUser', assignTaskToUser);
+taskRouter.get('/usersWithTask/:taskId', getUsersWithTask);
+
 
 
 
