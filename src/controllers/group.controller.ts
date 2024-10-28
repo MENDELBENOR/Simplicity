@@ -82,16 +82,16 @@ const updateGroup = async (req: Request, res: Response) => {
 
 //Delete a Group //
 const deleteGroup = async (req: Request, res: Response) => {
-    const { name } = req.body;
+    const { _id } = req.body;
 
     try {
-        if (!name) {
+        if (!_id) {
             const response = buildResponse(
                 false, 'No Group for delete', null, 'No matching parameter was received', null);
             res.status(400).json(response);
             return;
         }
-        const deletedGroup = await Group.findOneAndDelete({ name });
+        const deletedGroup = await Group.findByIdAndDelete(_id);
         if (!deletedGroup) {
             const response = buildResponse(false, 'Group not found', null, null, null);
             res.status(404).json(response)
