@@ -282,12 +282,14 @@ const loginWithGoogle = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
+    
     if (!user) {
       const response = buildResponse(false, 'The user does NOT exist', null, null, null);
       res.status(401).json(response);
       return;
     };
     const token = createToken(user._id);
+    
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 60 * 60 * 1000
@@ -295,6 +297,7 @@ const loginWithGoogle = async (req: Request, res: Response) => {
     const response = buildResponse(true, 'Login successful', null, null, user)
     res.status(200).json(response);
   } catch (err) {
+    
     const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
     res.status(500).json(response);
   }

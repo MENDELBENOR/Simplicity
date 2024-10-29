@@ -172,7 +172,6 @@ export const exportTaskList = async (req: Request, res: Response) => {
 
     try {
         const tasksList = await Task.find({ groupId: _id });
-        console.log(tasksList);
 
         if (!tasksList || tasksList.length === 0) {
             throw new Error("No tasks found");
@@ -214,15 +213,15 @@ export const exportTaskList = async (req: Request, res: Response) => {
 };
 
 
-//search tasks
 export const searchTask = async (req: Request, res: Response) => {
-
     try {
-        const { text } = req.params;
+        const { text, id } = req.params; // id כאן הוא ה-groupId
 
         const regex = new RegExp(text, 'i');
 
+        // חיפוש משימות עם groupId תואם
         const matchesTasks = await Task.find({
+            groupId: id, // הוסף את התנאי של groupId
             $or: [
                 { name: regex },
                 { description: regex },
@@ -233,6 +232,7 @@ export const searchTask = async (req: Request, res: Response) => {
         if (!matchesTasks || matchesTasks.length === 0) {
             throw new Error("There are no matching tasks");
         }
+        
         const response = buildResponse(true, 'Search tasks successfully', null, null, matchesTasks);
         res.status(200).json(response);
 
@@ -241,6 +241,7 @@ export const searchTask = async (req: Request, res: Response) => {
         res.status(500).json(response);
     }
 };
+
 
 export const getTaskByUser = async (req: Request, res: Response) => {
     const { _id } = req.params;
