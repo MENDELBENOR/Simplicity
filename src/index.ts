@@ -15,11 +15,15 @@ const app: Application = express();
 const PORT = process.env.PORT || 5001;
 
 
-// Middleware
 app.use(cors({
-  origin: [`http://localhost:5173`],
+  origin: ['http://localhost:5173'], // Your frontend origin
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 app.use(cookieParser());
@@ -31,7 +35,7 @@ app.use('/task', taskRouter);
 
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
 });
 

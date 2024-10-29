@@ -61,10 +61,10 @@ const createUser = async (req: Request, res: Response) => {
     // יצירת משתמש חדש
     // הצפנה של הקוד
     let newPassword: string = await bcrypt.hash(password, 10);
-    
+
     let newUser = new User({ firstName, lastName, email, phone, password: newPassword, icon });
     await newUser.save();
-    
+
     newUser.password = '*****';
     const response = buildResponse(true, 'New user successfully created', null, null, newUser)
     res.status(200).json(response);
@@ -207,7 +207,7 @@ const exportUsers = async (req: Request, res: Response) => {
     }
 
     // פורמט את נתוני המשתמשים כך שיכללו רק שדות נחוצים
-    const formattedUsers = users.map(( user, index) => ({
+    const formattedUsers = users.map((user, index) => ({
       ID: (index + 1).toString(),
       FirstName: user.firstName,
       LastName: user.lastName,
@@ -228,7 +228,7 @@ const exportUsers = async (req: Request, res: Response) => {
       { wch: 15 },   // תיאור
       { wch: 25 },   // סטטוס
       { wch: 20 },   // משך
-  ];
+    ];
 
     // יצירת Buffer מהקובץ
     const buffer = write(wb, { bookType: 'xlsx', type: 'buffer' });
@@ -282,14 +282,14 @@ const loginWithGoogle = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    
+
     if (!user) {
       const response = buildResponse(false, 'The user does NOT exist', null, null, null);
       res.status(401).json(response);
       return;
     };
     const token = createToken(user._id);
-    
+
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 60 * 60 * 1000
@@ -297,7 +297,7 @@ const loginWithGoogle = async (req: Request, res: Response) => {
     const response = buildResponse(true, 'Login successful', null, null, user)
     res.status(200).json(response);
   } catch (err) {
-    
+
     const response = buildResponse(false, 'Failed to login', null, err instanceof Error ? err.message : 'Unknown error', null);
     res.status(500).json(response);
   }
@@ -359,7 +359,7 @@ const otpService = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
-    
+
     if (!user) {
       const response = buildResponse(false, 'User does not found', null, null, null);
       res.status(401).json(response);
@@ -368,13 +368,13 @@ const otpService = async (req: Request, res: Response) => {
     // ייצור קוד OTP
     const otp = generateOTP();
     // שליחת הקוד למייל
-    try{
+    try {
       await sendEmail(email, otp);
-    } catch(err){
+    } catch (err) {
       console.log("error is------", err);
-      
+
     }
-  
+
 
     const response = buildResponse(true, 'OTP sent to email', null, null, null);
     res.status(200).json(response);
