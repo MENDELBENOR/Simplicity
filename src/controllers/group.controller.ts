@@ -82,7 +82,7 @@ const updateGroup = async (req: Request, res: Response) => {
 
 //Delete a Group //
 const deleteGroup = async (req: Request, res: Response) => {
-    const { _id } = req.body;
+    const { _id } = req.params;
 
     try {
         if (!_id) {
@@ -103,7 +103,7 @@ const deleteGroup = async (req: Request, res: Response) => {
         const response = buildResponse(false, 'Failed to delete group', null, error instanceof Error ? error.message : 'Unknown error', null);
         res.status(500).json(response);
     }
-}
+};
 
 export { getGroupsByProject, createGroup, updateGroup, deleteGroup }
 
