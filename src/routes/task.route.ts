@@ -8,7 +8,7 @@ taskRouter.post('/createTask', createTask);
 taskRouter.post('/updateTask', editTask);
 taskRouter.post('/deleteTask', deleteTask);
 taskRouter.post('/exportTaskList', exportTaskList);
-taskRouter.get('/searchTask/:text', searchTask);
+taskRouter.get('/searchTask/:text/:id', searchTask);
 taskRouter.get('/getTaskByUser/:_id', getTaskByUser);
 taskRouter.post('/assignTaskToUser', assignTaskToUser);
 taskRouter.get('/usersWithTask/:taskId', getUsersWithTask);
