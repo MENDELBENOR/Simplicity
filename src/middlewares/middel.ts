@@ -19,6 +19,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     try {
         const { id } = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
         req.body.USER_ID = id;
+        
         next();
 
     } catch (err) {

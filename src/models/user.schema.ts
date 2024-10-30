@@ -4,15 +4,15 @@ import { IUser } from '../utils/types'
 
 //  הגדרת הסכמה לשדות המשתמש
 const userSchema: Schema = new Schema({
-  firstName: { type: String, required: true, minlength: 2 },                               // שם פרטי, נדרש
-  lastName: { type: String, required: true, minlength: 2 },                               // שם משפחה, נדרש
-  email: { type: String, required: true, unique: true },                                 // אימייל, ייחודי ונדרש
-  phone: { type: String, required: true, unique: true },                                // מספר טלפון, ייחודי ונדרש  
-  password: { type: String, required: true, minlength: 8, match: /^\$2b\$10\$.+/ },    // סיסמה ייחודי ונדרש מוגבל לספרות ואותיות לועזיות
-  workSpaceList: { type: [String] },                                                  // חיבור ל workspaces
-  icon: { type: String, default: "" }                                                             // הוספת אייקון
+  firstName: { type: String, required: true, minlength: 2 },                            
+  lastName: { type: String, required: true, minlength: 2 },                              
+  email: { type: String, required: true, unique: true },                          
+  phone: { type: String, required: true, unique: true },                                
+  password: { type: String, required: true, minlength: 8, match: /^\$2b\$10\$.+/ },    
+  workSpaceList: { type: [String] },                                                 
+  icon: { type: String, default: "" }                                                        
 }, {
-  timestamps: true                                                                  // מוסיף שדות לתארוך זמן יצירת היוזר, ולזמן עדכון היוזר
+  timestamps: true                                                                 
 });
 
 // יצירת המודל עבור הקולקציה "users"

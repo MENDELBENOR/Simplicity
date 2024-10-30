@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import projectRouter from './routes/project.route';
 import groupRouter from './routes/group.route';
 import taskRouter from './routes/task.route';
+import  { authMiddleware } from './middlewares/middel';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -23,7 +24,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+
 app.use('/api', userRouter);
+
+app.use(authMiddleware);
 app.use('/project', projectRouter);
 app.use('/group', groupRouter);
 app.use('/task', taskRouter);
